@@ -20,9 +20,6 @@ app.add_middleware(
 
 ratings = pd.read_csv('./data/ratings.csv')
 movies = pd.read_csv('./data/movies.csv')
-# posters = pd.read_csv('./data/posters.csv')
-# movies = movies.merge(posters, how='left', on='movieId')
-# print(movies.head())
 data = ratings.merge(movies,on='movieId', how='left') # merged ratings and movies
 
 # getting average rating and count of ratings

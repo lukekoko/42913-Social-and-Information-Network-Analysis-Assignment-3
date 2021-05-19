@@ -7,7 +7,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
- ![]([project_demo.gif])
+![Alt text](project_demo.gif)
 
 Simple website that utilises a recommendation system based on the content-based filtering method. The system has been trained on the MovieLens 100k dataset. The website shows the most popular movies from the dataset and will provide a range of similar movie selections for each movie. 
 

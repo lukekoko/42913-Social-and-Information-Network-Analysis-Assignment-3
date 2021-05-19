@@ -43,7 +43,7 @@ def read_movies():
 
 @app.get("/movies/stat")
 def read_movies_stat():
-    return {"movies": avg_rating.head(100).to_dict("records")}
+    return {"movies": avg_rating.head(1000).to_dict("records")}
 
 @app.get("/recommend/{movie}")
 def recommendation(movie: str):

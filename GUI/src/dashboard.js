@@ -27,6 +27,8 @@ export default function Dashboard() {
     const [modalIsOpen, setIsOpen] = React.useState(false);
     const [modalData, setModalData] = React.useState({ title: "" });
     const [recData, setRecData] = React.useState([]);
+    let [page, setPage] = React.useState(1);
+    let [maxPage, setMaxPage] = React.useState(0)
 
     function openModal(data) {
         setLoadingRec(true);
@@ -46,11 +48,16 @@ export default function Dashboard() {
         const result = await axios.get("http://127.0.0.1:8000/recommend/" + movie);
         let tempArr = result.data.recommendations
         for (const i of tempArr) {
-            let searchTitle = i.title.replace(/(\(.*\))/g, "").replace(", The", "").trim();
-            const res = await axios.get(API_URL_MOVIEDB + searchTitle);
-            i.poster = res.data.results[0].poster_path;
-            i.overview = res.data.results[0].overview;
-            i.release_date = res.data.results[0].release_date;
+            try {
+                let searchTitle = i.title.replace(/(\(.*\))/g, "").replace(", The", "").trim();
+                const res = await axios.get(API_URL_MOVIEDB + searchTitle);
+                i.poster = res.data.results[0].poster_path;
+                i.overview = res.data.results[0].overview;
+                i.release_date = res.data.results[0].release_date;
+            } catch (err) {
+                console.log(err);
+                i.poster = "/h5J4W4veyxMXDMjeNxZI46TsHOb.jpg";
+            }
         }
         await setRecData(tempArr);
         setLoadingRec(false);
@@ -61,26 +68,31 @@ export default function Dashboard() {
             setLoading(true);
             const result = await axios.get("http://127.0.0.1:8000/movies/stat");
             let tempArr = result.data.movies;
+            setMaxPage(tempArr.length / 8);
+            tempArr = paginate(tempArr, 8, page);
             for (const movie of tempArr) {
                 try {
                     let searchTitle = movie.title.replace(/(\(.*\))/g, "").replace(", The", "").trim();
-                    // console.log(searchTitle);
                     const result = await axios.get(API_URL_MOVIEDB + searchTitle);
-                    // console.log(result);
                     movie.poster = result.data.results[0].poster_path;
                     movie.overview = result.data.results[0].overview;
                     movie.release_date = result.data.results[0].release_date;
                 } catch (err) {
                     console.log(err);
-                    movie.poster = "/h5J4W4veyxMXDMjeNxZI46TsHOb.jpg";
+                    movie.poster = "/h5J4W4veyxMXDMjeNxZI46TsHOb.jpg"; // if error use default movie poster (forest gump)
                 }
             }
             setPopMovies(tempArr);
             setLoading(false);
         }
         fetchPopularMovies();
-    }, []);
+    }, [page]);
 
+    function paginate(array, page_size, page_number) {
+        // human-readable page numbers usually start with 1, so we reduce 1 in the first argument
+        const arr = array.slice((page_number - 1) * page_size, page_number * page_size);
+        return arr;
+    }
 
     return (
         <div>
@@ -107,6 +119,14 @@ export default function Dashboard() {
                     })}
                 </div>
             </section>
+            <div class="flex content-end justify-end">
+                <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l" onClick={() => { page > 1 ? setPage(page - 1) : setPage(1) }}>
+                    Prev
+                    </button>
+                <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r" onClick={() => { page < maxPage ? setPage(page + 1) : setPage(maxPage) }}>
+                    Next
+                </button>
+            </div>
 
             <Modal
                 isOpen={modalIsOpen}
